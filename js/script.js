@@ -223,6 +223,68 @@ function generatePassword(){
 
     // calculate strength
     calcStrength();
+    
+    //save the password
+    saveToHistory(password);
 }
 
+
+//Implement functions to perform save and show passwords history operations 
+const showHistoryButton = document.getElementById("show-history-button");
+const passwordPopup = document.getElementById("password-popup");
+const clearButton = document.getElementById("clear-popup-button");
+
+showHistoryButton.addEventListener("click", () => {
+    if (passwordPopup.style.display === "none") {
+        passwordPopup.style.display = "block";
+        updatePasswordHistory(JSON.parse(localStorage.getItem("passwordHistory")) || []);
+    } else {
+        passwordPopup.style.display = "none";
+    }
+});
+
+function saveToHistory(password) {
+
+    const timestamp = new Date().toLocaleString();
+
+    // Get the existing password history from local storage
+    const history = JSON.parse(localStorage.getItem("passwordHistory")) || [];
+    
+    // Add the new password to the history
+    history.push({ password, timestamp });
+
+
+    // Save the updated history back to local storage
+    localStorage.setItem("passwordHistory", JSON.stringify(history));
+
+    // Update the displayed password history
+    updatePasswordHistory(history);
+}
+
+function updatePasswordHistory(history) {
+    const passwordList = document.getElementById("password-list");
+    passwordList.innerHTML = '';
+
+    history.forEach((entry, index) => {
+        const listItem = document.createElement("li");
+        const timestamp = entry.timestamp;
+        const password = entry.password;
+        listItem.innerHTML = `${timestamp} -> ${password}`;
+        passwordList.appendChild(listItem);
+    });
+}
+
+clearButton.addEventListener("click", clearHistory);
+
+// Load the password history when the page loads
+updatePasswordHistory(JSON.parse(localStorage.getItem("passwordHistory")) || []);
+
+//function clears all the stored passwords
+function clearHistory() {
+    // Clear the history in local storage
+    localStorage.removeItem("passwordHistory");
+
+    // Update the displayed password history
+    updatePasswordHistory([]);
+}
 generateButton.addEventListener('click', generatePassword);
